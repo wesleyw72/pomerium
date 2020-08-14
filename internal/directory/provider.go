@@ -4,6 +4,9 @@ package directory
 import (
 	"context"
 	"net/url"
+	"sync"
+
+	"github.com/google/go-cmp/cmp"
 
 	"github.com/pomerium/pomerium/internal/directory/azure"
 	"github.com/pomerium/pomerium/internal/directory/github"
@@ -34,8 +37,26 @@ type Options struct {
 	QPS            float64
 }
 
+var globalProvider = struct {
+	sync.Mutex
+	provider Provider
+	options  Options
+}{}
+
 // GetProvider gets the provider for the given options.
-func GetProvider(options Options) Provider {
+func GetProvider(options Options) (provider Provider) {
+	globalProvider.Lock()
+	defer globalProvider.Unlock()
+
+	if globalProvider.provider != nil && cmp.Equal(globalProvider.options, options) {
+		log.Debug().Str("provider", options.Provider).Msg("directory: no change detected, reusing existing directory provider")
+		return globalProvider.provider
+	}
+	defer func() {
+		globalProvider.provider = provider
+		globalProvider.options = options
+	}()
+
 	switch options.Provider {
 	case azure.Name:
 		serviceAccount, err := azure.ParseServiceAccount(options.ServiceAccount)
