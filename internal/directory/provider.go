@@ -5,7 +5,6 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/pomerium/pomerium/config"
 	"github.com/pomerium/pomerium/internal/directory/azure"
 	"github.com/pomerium/pomerium/internal/directory/github"
 	"github.com/pomerium/pomerium/internal/directory/gitlab"
@@ -27,8 +26,16 @@ type Provider interface {
 	UserGroups(ctx context.Context) ([]*Group, []*User, error)
 }
 
+// Options are the options specific to the provider.
+type Options struct {
+	ServiceAccount string
+	Provider       string
+	ProviderURL    string
+	QPS            float64
+}
+
 // GetProvider gets the provider for the given options.
-func GetProvider(options *config.Options) Provider {
+func GetProvider(options Options) Provider {
 	switch options.Provider {
 	case azure.Name:
 		serviceAccount, err := azure.ParseServiceAccount(options.ServiceAccount)

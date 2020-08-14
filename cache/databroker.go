@@ -22,7 +22,7 @@ type DataBrokerServer struct {
 }
 
 // NewDataBrokerServer creates a new databroker service server.
-func NewDataBrokerServer(grpcServer *grpc.Server, opts config.Options) (*DataBrokerServer, error) {
+func NewDataBrokerServer(grpcServer *grpc.Server, opts *config.Options) (*DataBrokerServer, error) {
 	key, err := base64.StdEncoding.DecodeString(opts.SharedKey)
 	if err != nil || len(key) != cryptutil.DefaultKeySize {
 		return nil, fmt.Errorf("shared key is required and must be %d bytes long", cryptutil.DefaultKeySize)
