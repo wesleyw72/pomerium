@@ -38,11 +38,11 @@ func New(cfg *config.Config) (*Authorize, error) {
 		dataBrokerData: make(evaluator.DataBrokerData),
 	}
 
-	if state, err := newAuthorizeStateFromConfig(cfg, a.store); err != nil {
+	state, err := newAuthorizeStateFromConfig(cfg, a.store)
+	if err != nil {
 		return nil, err
-	} else {
-		a.state = newAtomicAuthorizeState(state)
 	}
+	a.state = newAtomicAuthorizeState(state)
 
 	return &a, nil
 }
