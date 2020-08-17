@@ -58,10 +58,7 @@ func New(cfg *config.Config) (*Cache, error) {
 		return nil, err
 	}
 
-	dataBrokerServer, err := NewDataBrokerServer(localGRPCServer, cfg.Options)
-	if err != nil {
-		return nil, err
-	}
+	dataBrokerServer := NewDataBrokerServer(localGRPCServer, cfg)
 
 	c := &Cache{
 		dataBrokerServer:             dataBrokerServer,
@@ -86,6 +83,8 @@ func (c *Cache) OnConfigChange(cfg *config.Config) {
 	if err != nil {
 		log.Error().Err(err).Msg("cache: error updating configuration")
 	}
+
+	c.dataBrokerServer.OnConfigChange(cfg)
 }
 
 // Register registers all the gRPC services with the given server.
