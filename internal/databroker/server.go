@@ -462,10 +462,9 @@ func (srv *Server) newDB(recordType string) (db storage.Backend, err error) {
 	case config.StorageInMemoryName:
 		return inmemory.NewDB(recordType, srv.cfg.btreeDegree), nil
 	case config.StorageRedisName:
-		db, err = redis.New(
+		db, err = redis.NewV2(
 			srv.cfg.storageConnectionString,
-			recordType,
-			int64(srv.cfg.deletePermanentlyAfter.Seconds()),
+			redis.WithRecordType(recordType),
 			redis.WithTLSConfig(tlsConfig),
 		)
 		if err != nil {

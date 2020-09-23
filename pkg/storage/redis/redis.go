@@ -3,7 +3,6 @@ package redis
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"net"
 	"strconv"
@@ -32,37 +31,33 @@ var _ storage.Backend = (*DB)(nil)
 
 // DB wraps redis conn to interact with redis server.
 type DB struct {
-	pool                   *redis.Pool
-	deletePermanentlyAfter int64
-	recordType             string
-	lastVersionKey         string
-	versionSet             string
-	deletedSet             string
-	tlsConfig              *tls.Config
-	notifyChMu             sync.Mutex
+	cfg *dbConfig
+
+	pool           *redis.Pool
+	recordType     string
+	lastVersionKey string
+	versionSet     string
+	deletedSet     string
+	notifyChMu     sync.Mutex
 
 	closeOnce sync.Once
 	closed    chan struct{}
 }
 
 // New returns new DB instance.
-func New(rawURL, recordType string, deletePermanentAfter int64, opts ...Option) (*DB, error) {
+func New(rawURL string, opts ...Option) (*DB, error) {
 	db := &DB{
-		deletePermanentlyAfter: deletePermanentAfter,
-		recordType:             recordType,
-		versionSet:             recordType + "_version_set",
-		deletedSet:             recordType + "_deleted_set",
-		lastVersionKey:         recordType + "_last_version",
-		closed:                 make(chan struct{}),
+		cfg:    getConfig(opts...),
+		closed: make(chan struct{}),
 	}
+	db.versionSet = db.cfg.recordType + "_version_set"
+	db.deletedSet = db.cfg.recordType + "_deleted_set"
+	db.lastVersionKey = db.cfg.recordType + "_last_version"
 
-	for _, o := range opts {
-		o(db)
-	}
 	db.pool = &redis.Pool{
 		Wait: true,
 		Dial: func() (redis.Conn, error) {
-			c, err := redis.DialURL(rawURL, redis.DialTLSConfig(db.tlsConfig))
+			c, err := redis.DialURL(rawURL, redis.DialTLSConfig(db.cfg.tls))
 			if err != nil {
 				return nil, fmt.Errorf(`redis.DialURL(): %w`, err)
 			}
@@ -188,7 +183,7 @@ func (db *DB) List(ctx context.Context, sinceVersion string) (rec []*databroker.
 	return pbRecords, nil
 }
 
-// Delete sets a record DeletedAt field and set its TTL.
+// Delete sets a record DeletedAt field and setRecord its TTL.
 func (db *DB) Delete(ctx context.Context, id string) (err error) {
 	c := db.pool.Get()
 	_, span := trace.StartSpan(ctx, "databroker.redis.Delete")
@@ -266,7 +261,7 @@ func (db *DB) doNotifyLoop(ctx context.Context, ch chan struct{}) {
 	}(&psc)
 
 	if err := db.subscribeRedisChannel(&psc); err != nil {
-		log.Error().Err(err).Msg("failed to subscribe to version set channel")
+		log.Error().Err(err).Msg("failed to subscribe to version setRecord channel")
 		return
 	}
 	for {
@@ -343,7 +338,7 @@ func (db *DB) subscribeRedisChannel(psc *redis.PubSubConn) error {
 	return psc.PSubscribe("__keyspace*__:" + db.versionSet)
 }
 
-// Watch returns a channel to the caller, when there is a change to the version set,
+// Watch returns a channel to the caller, when there is a change to the version setRecord,
 // sending message to the channel to notify the caller.
 func (db *DB) Watch(ctx context.Context) <-chan struct{} {
 	ch := make(chan struct{})

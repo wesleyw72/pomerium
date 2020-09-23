@@ -15,6 +15,7 @@ require (
 	github.com/envoyproxy/go-control-plane v0.9.6
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/go-chi/chi v4.1.2+incompatible
+	github.com/go-redis/redis/v8 v8.2.0
 	github.com/golang/mock v1.4.4
 	github.com/golang/protobuf v1.4.2
 	github.com/gomodule/redigo v1.8.2
@@ -32,9 +33,7 @@ require (
 	github.com/mitchellh/hashstructure v1.0.0
 	github.com/natefinch/atomic v0.0.0-20200526193002-18c0533a5b09
 	github.com/nsf/jsondiff v0.0.0-20200515183724-f29ed568f4ce
-	github.com/onsi/ginkgo v1.11.0 // indirect
 	github.com/onsi/gocleanup v0.0.0-20140331211545-c1a5478700b5
-	github.com/onsi/gomega v1.8.1 // indirect
 	github.com/open-policy-agent/opa v0.23.2
 	github.com/openzipkin/zipkin-go v0.2.4
 	github.com/ory/dockertest/v3 v3.6.0
