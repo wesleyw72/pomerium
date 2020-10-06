@@ -3,7 +3,6 @@ syntax = "proto3";
 package audit;
 option go_package = "github.com/pomerium/pomerium/pkg/grpc/audit";
 
-import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 message Record {
@@ -50,4 +49,10 @@ message Status {
   string message = 2;
 }
 
-service Intake { rpc Publish(stream Record) returns (google.protobuf.Empty); }
+message ConfirmRetrieval {
+  string id = 1;
+}
+
+service AuditService {
+  rpc RetrieveAuditRecords(stream ConfirmRetrieval) returns (stream Record);
+}

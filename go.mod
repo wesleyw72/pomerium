@@ -34,6 +34,7 @@ require (
 	github.com/mitchellh/hashstructure v1.0.0
 	github.com/natefinch/atomic v0.0.0-20200526193002-18c0533a5b09
 	github.com/nsf/jsondiff v0.0.0-20200515183724-f29ed568f4ce
+	github.com/oklog/ulid/v2 v2.0.2
 	github.com/onsi/ginkgo v1.11.0 // indirect
 	github.com/onsi/gocleanup v0.0.0-20140331211545-c1a5478700b5
 	github.com/onsi/gomega v1.8.1 // indirect

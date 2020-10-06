@@ -24,6 +24,7 @@ import (
 	"github.com/pomerium/pomerium/internal/log"
 	"github.com/pomerium/pomerium/internal/urlutil"
 	"github.com/pomerium/pomerium/internal/version"
+	"github.com/pomerium/pomerium/pkg/grpc/audit"
 	"github.com/pomerium/pomerium/proxy"
 )
 
@@ -155,6 +156,7 @@ func setupAuthorize(src config.Source, cfg *config.Config, controlPlane *control
 		return nil, fmt.Errorf("error creating authorize service: %w", err)
 	}
 	envoy_service_auth_v2.RegisterAuthorizationServer(controlPlane.GRPCServer, svc)
+	audit.RegisterAuditServiceServer(controlPlane.GRPCServer, svc)
 
 	log.Info().Msg("enabled authorize service")
 	src.OnConfigChange(svc.OnConfigChange)

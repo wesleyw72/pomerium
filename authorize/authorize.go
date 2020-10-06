@@ -25,6 +25,8 @@ type Authorize struct {
 	currentOptions *config.AtomicOptions
 	templates      *template.Template
 
+	auditRecords *auditRecordCollection
+
 	dataBrokerDataLock sync.RWMutex
 	dataBrokerData     evaluator.DataBrokerData
 }
@@ -35,6 +37,7 @@ func New(cfg *config.Config) (*Authorize, error) {
 		currentOptions: config.NewAtomicOptions(),
 		store:          evaluator.NewStore(),
 		templates:      template.Must(frontend.NewTemplates()),
+		auditRecords:   newAuditRecordCollection(),
 		dataBrokerData: make(evaluator.DataBrokerData),
 	}
 

@@ -61,16 +61,22 @@ func (a *Authorize) Check(ctx context.Context, in *envoy_service_auth_v2.CheckRe
 	}
 	logAuthorizeCheck(ctx, in, reply)
 
+	var out *envoy_service_auth_v2.CheckResponse
 	switch {
 	case reply.Status == http.StatusOK:
-		return a.okResponse(reply), nil
+		out = a.okResponse(reply)
 	case reply.Status == http.StatusUnauthorized:
 		if isForwardAuth {
-			return a.deniedResponse(in, http.StatusUnauthorized, "Unauthenticated", nil), nil
+			out = a.deniedResponse(in, http.StatusUnauthorized, "Unauthenticated", nil)
+		} else {
+			out = a.redirectResponse(in)
 		}
-		return a.redirectResponse(in), nil
+	default:
+		out = a.deniedResponse(in, int32(reply.Status), reply.Message, nil)
 	}
-	return a.deniedResponse(in, int32(reply.Status), reply.Message, nil), nil
+	a.auditRecords.add(a.getAuditRecord(in, out, reply, sessionState))
+
+	return out, nil
 }
 
 func (a *Authorize) forceSync(ctx context.Context, ss *sessions.State) error {
