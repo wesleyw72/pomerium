@@ -82,7 +82,7 @@ func (src *ConfigSource) rebuild(firstTime bool) {
 	// start the updater
 	src.runUpdater(cfg)
 
-	seen := map[uint64]struct{}{}
+	seen := map[string]struct{}{}
 	for _, policy := range cfg.Options.Policies {
 		seen[policy.RouteID()] = struct{}{}
 	}

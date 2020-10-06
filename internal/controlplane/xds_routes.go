@@ -181,7 +181,7 @@ func buildControlPlanePrefixRoute(prefix string) *envoy_config_route_v3.Route {
 }
 
 var getPolicyName = func(policy *config.Policy) string {
-	return fmt.Sprintf("policy-%x", policy.RouteID())
+	return fmt.Sprintf("policy-%s", policy.RouteID())
 }
 
 func buildPolicyRoutes(options *config.Options, domain string) []*envoy_config_route_v3.Route {

@@ -16,6 +16,7 @@ message Record {
   oneof response { HTTPResponse http_response = 8; }
   Status status = 9;
   map<string, string> metadata = 10;
+  string route_name = 11;
 }
 
 message AuthenticationInfo {

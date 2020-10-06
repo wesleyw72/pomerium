@@ -23,6 +23,8 @@ import (
 
 // Policy contains route specific configuration and access settings.
 type Policy struct {
+	Name string `mapstructure:"name" yaml:"name"`
+
 	From string `mapstructure:"from" yaml:"from"`
 	To   string `mapstructure:"to" yaml:"to"`
 	// Identity related policy
@@ -147,6 +149,7 @@ func NewPolicyFromProto(pb *configpb.Route) (*Policy, error) {
 	timeout, _ := ptypes.Duration(pb.GetTimeout())
 
 	p := &Policy{
+		Name:                             pb.GetName(),
 		From:                             pb.GetFrom(),
 		To:                               pb.GetTo(),
 		AllowedUsers:                     pb.GetAllowedUsers(),
@@ -204,7 +207,7 @@ func (p *Policy) ToProto() *configpb.Route {
 		})
 	}
 	return &configpb.Route{
-		Name:                             fmt.Sprint(p.RouteID()),
+		Name:                             p.RouteID(),
 		From:                             p.From,
 		To:                               p.To,
 		AllowedUsers:                     p.AllowedUsers,
@@ -320,7 +323,11 @@ func (p *Policy) Checksum() uint64 {
 }
 
 // RouteID returns a unique identifier for a route
-func (p *Policy) RouteID() uint64 {
+func (p *Policy) RouteID() string {
+	if p.Name != "" {
+		return p.Name
+	}
+
 	id := routeID{
 		Source:      p.Source,
 		Destination: p.Destination,
@@ -332,7 +339,7 @@ func (p *Policy) RouteID() uint64 {
 	cs, _ := hashstructure.Hash(id, &hashstructure.HashOptions{
 		Hasher: xxhash.New(),
 	})
-	return cs
+	return fmt.Sprint(cs)
 }
 
 func (p *Policy) String() string {

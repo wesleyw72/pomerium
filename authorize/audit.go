@@ -190,6 +190,7 @@ func (a *Authorize) getAuditRecord(
 		},
 	}
 	if reply.MatchingPolicy != nil {
+		record.RouteName = reply.MatchingPolicy.RouteID()
 		record.Destination = reply.MatchingPolicy.Destination.String()
 	}
 	if sessionState != nil {
