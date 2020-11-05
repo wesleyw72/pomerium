@@ -48,10 +48,11 @@ func (a *Authorize) Check(ctx context.Context, in *envoy_service_auth_v2.CheckRe
 		fwdAuthURI := getForwardAuthURL(hreq)
 		in.Attributes.Request.Http.Scheme = fwdAuthURI.Scheme
 		in.Attributes.Request.Http.Host = fwdAuthURI.Host
-		in.Attributes.Request.Http.Path = fwdAuthURI.Path
+		in.Attributes.Request.Http.Path = fwdAuthURI.EscapedPath()
 		if fwdAuthURI.RawQuery != "" {
 			in.Attributes.Request.Http.Path += "?" + fwdAuthURI.RawQuery
 		}
+		// hreq = getHTTPRequestFromCheckRequest(in)
 	}
 
 	rawJWT, _ := loadRawSession(hreq, a.currentOptions.Load(), state.encoder)
@@ -194,8 +195,13 @@ func getForwardAuthURL(r *http.Request) *url.URL {
 			Path:   r.Header.Get(httputil.HeaderForwardedURI),
 		}
 	}
-	// todo(bdd): handle httputil.HeaderOriginalURL which incorporates
-	// 			  path and query params
+	originalURL := r.Header.Get(httputil.HeaderOriginalURL)
+	if originalURL != "" {
+		k, _ := urlutil.ParseAndValidateURL(originalURL)
+		if k != nil {
+			u = k
+		}
+	}
 	return u
 }
 
